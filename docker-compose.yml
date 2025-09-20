@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  hr-copilot:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./hr_copilot.db
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SECRET_KEY=your-secret-key-change-in-production
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+      - ./chroma_db:/app/chroma_db
+    command: >
+      sh -c "
+        python init_db.py &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000
+      "
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
+
